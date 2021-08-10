@@ -76,7 +76,7 @@ class cEntity(cBEntity):
         self.Screen = pyScreen
         self.FlagMovement = []
 
-        self.EnemyPosDiff = 3  # Button will init this
+        self.EnemyPosDiff = 3
         self.PlayerPosDiff = 1
         self.PositionChange = 0
 
@@ -148,7 +148,7 @@ class cEntity(cBEntity):
 
     def EnemyPosInit(self):
         for diffCount in range(self.EnemyPosDiff):
-            self.lEnemyPos.append([random.randint(0, 1000), random.randint(50, 250)])  # change maybe to not rand out of cornmer
+            self.lEnemyPos.append([random.randint(0, 1000), random.randint(50, 250)])
 
     def newEnemyPosInit(self):
         for it in range(len(self.initNewEnemy)):
@@ -186,12 +186,12 @@ class cMain(cBMain):
         self.pgScreen.blit(scorePrint, ((self.iWidVal / 2) + 40, 10))
 
     def GUI(self):
-        pygame.display.set_caption("Kill nazi")  # name of game
-        icon = pygame.image.load('antifa.png')  # icon
-        pygame.display.set_icon(icon)  # displaying an icon
+        pygame.display.set_caption("Kill nazi")
+        icon = pygame.image.load('antifa.png')
+        pygame.display.set_icon(icon)
 
     def FillScreen(self):
-        self.pgScreen.fill((255, 255, 255))  # RBB - red, green, blue COLOR SCREEN
+        self.pgScreen.fill((255, 255, 255))
 
     def Init(self):
         self.oEntity.PlayerPosInit()
