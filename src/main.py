@@ -34,6 +34,9 @@ class cBEntity:
     def EnemyDestroyed(self):
         pass
 
+    def GetInfected(self):
+        pass
+
     def ScoreCounter(self):
         pass
 
@@ -58,6 +61,9 @@ class cBMain:
     def KeyboardInput(self, _allEvents):
         pass
 
+    def EndKeyboardInput(self, _allEvents):
+        pass
+
     def UpdateScreen(self):
         pass
 
@@ -68,6 +74,9 @@ class cBMain:
         pass
 
     def ShowScore(self):
+        pass
+
+    def EndThread(self):
         pass
 
 
@@ -88,6 +97,10 @@ class cEntity(cBEntity):
         self.tVaccinePos = []
 
         self.bFireVaccine = []
+        self.Collistion = 27
+
+        self.bGetInfection = False
+
 
     def FlagInit(self):
         for it in range(self.EnemyPosDiff):
@@ -142,9 +155,16 @@ class cEntity(cBEntity):
             count += 1
             for vacPos in self.tVaccinePos:
                 collision = math.sqrt((math.pow(enemyIt[0] - vacPos[0], 2)) + (math.pow(enemyIt[1] - vacPos[1], 2)))
-                if collision < 27:
+                if collision < self.Collistion:
                     self.initNewEnemy[count - 1] = True
                     self.ScoreValue += 1
+
+    def GetInfected(self):
+        for playerIt in self.lPlayerPos:
+            for enemyIt in self.lEnemyPos:
+                infection = math.sqrt((math.pow(playerIt[0] - enemyIt[0], 2)) + (math.pow(playerIt[1] - enemyIt[1], 2)))
+                if infection < 50:
+                    self.bGetInfection = True
 
     def EnemyPosInit(self):
         for diffCount in range(self.EnemyPosDiff):
@@ -168,7 +188,6 @@ class cMain(cBMain):
         self.iWidVal = iWidthScreenV
 
         self.bRunning = True
-
         self.PlayerImage = pygame.image.load(sPlayerImage)
         self.EnemyImage = pygame.image.load(sEnemyImage)
         self.VaccineImage = pygame.image.load(sVaccineImage)
@@ -200,7 +219,10 @@ class cMain(cBMain):
 
     def Event(self):
         for event in pygame.event.get():
-            self.KeyboardInput(event)
+            if not self.oEntity.bGetInfection:
+                self.KeyboardInput(event)
+            else:
+                self.EndKeyboardInput(event)
 
     def UpdateScreen(self):
         pygame.display.update()
@@ -225,6 +247,30 @@ class cMain(cBMain):
                 self.oEntity.bFireVaccine.append(True)
                 self.oEntity.tVaccinePos.append([self.oEntity.lPlayerPos[0][0], self.oEntity.lPlayerPos[0][1]])
         self.oEntity.PositionChange = 0
+
+    def EndKeyboardInput(self, _allEvents):
+        if _allEvents.type == pygame.QUIT:
+            self.oEntity.bGetInfection = False
+            self.bRunning = False
+
+        if _allEvents.type == pygame.KEYDOWN:
+            if _allEvents.key == pygame.K_ESCAPE:
+                self.oEntity.bGetInfection = False
+                self.bRunning = False
+            elif _allEvents.key == pygame.K_RETURN:
+                self.oEntity.bGetInfection = False
+
+    def EndThread(self):
+        if self.oEntity.bGetInfection:
+            while self.oEntity.bGetInfection:
+                self.Event()
+                self.pgScreen.fill((255, 255, 255))
+                scorePrint = self.ScoreFont.render("Dumb nazi infected you ! Your score is: "
+                                                   +
+                                                   str(self.oEntity.ScoreValue),
+                                                   True, (0, 0, 0))
+                self.pgScreen.blit(scorePrint, ((self.iWidVal / 2) - 10, (self.iHeiVal / 2) - (self.iHeiVal / 4)))
+                self.UpdateScreen()
 
     def SetFlag(self):
         count = 0
@@ -252,6 +298,8 @@ class cMain(cBMain):
             self.oEntity.newEnemyPosInit()
             self.ShowScore()
             self.UpdateScreen()
+            self.oEntity.GetInfected()
+            self.EndThread()
 
 
 if __name__ == "__main__":
