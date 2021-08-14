@@ -101,7 +101,7 @@ class cEntity(cBEntity):
         self.tVaccinePos = []
 
         self.bFireVaccine = []
-        self.Collistion = 27
+        self.Collision = (27, 50)
 
         self.bGetInfection = False
 
@@ -158,7 +158,7 @@ class cEntity(cBEntity):
             count += 1
             for vacPos in self.tVaccinePos:
                 collision = math.sqrt((math.pow(enemyIt[0] - vacPos[0], 2)) + (math.pow(enemyIt[1] - vacPos[1], 2)))
-                if collision < self.Collistion:
+                if collision < self.Collision[0]:
                     self.initNewEnemy[count - 1] = True
                     self.ScoreValue += 1
 
@@ -166,7 +166,7 @@ class cEntity(cBEntity):
         for playerIt in self.lPlayerPos:
             for enemyIt in self.lEnemyPos:
                 infection = math.sqrt((math.pow(playerIt[0] - enemyIt[0], 2)) + (math.pow(playerIt[1] - enemyIt[1], 2)))
-                if infection < 50:
+                if infection < self.Collision[1]:
                     self.bGetInfection = True
 
     def newEnemyPosInit(self):
@@ -175,9 +175,9 @@ class cEntity(cBEntity):
                 self.lEnemyPos[it] = ([random.randint(0, 1000), random.randint(50, 250)])
                 self.initNewEnemy[it] = False
 
-    def PosInit(self, EntityPos, ValuesForInit, PosDiff):
+    def PosInit(self, EntityPos, tValuesForInit, PosDiff):
         for it in range(PosDiff):
-            EntityPos.append([random.randint(*ValuesForInit[0]), random.randint(*ValuesForInit[1])])
+            EntityPos.append([random.randint(*tValuesForInit[0]), random.randint(*tValuesForInit[1])])
         return EntityPos
 
 
