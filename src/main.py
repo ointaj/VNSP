@@ -49,6 +49,9 @@ class cBMain:
     def Init(self):
         pass
 
+    def InitEndEntity(self):
+        pass
+
     def Event(self):
         pass
 
@@ -81,7 +84,7 @@ class ValuesForInit:
     def __init__(self, _tEnemyPos, _tPlayerPos, _tCoronaPos):
         self.tInitEnemyPos = _tEnemyPos
         self.tInitPlayerPos = _tPlayerPos
-        self.tInitPlayerPos = _tPlayerPos
+        self.tInitCovidPos = _tCoronaPos
 
 
 class cEntity(cBEntity):
@@ -91,14 +94,17 @@ class cEntity(cBEntity):
 
         self.EnemyPosDiff = 3
         self.PlayerPosDiff = 1
-        self.PositionChange = 0
+        self.CoronaPosDiff = 4
 
+        self.PositionChange = 0
         self.ScoreValue = 0
 
         self.initNewEnemy = []
+
         self.lEnemyPos = []
         self.lPlayerPos = []
         self.tVaccinePos = []
+        self.tCovidePos = []
 
         self.bFireVaccine = []
         self.Collision = (27, 50)
@@ -178,19 +184,21 @@ class cEntity(cBEntity):
     def PosInit(self, EntityPos, tValuesForInit, PosDiff):
         for it in range(PosDiff):
             EntityPos.append([random.randint(*tValuesForInit[0]), random.randint(*tValuesForInit[1])])
-        return EntityPos
 
 
 class cMain(cBMain):
-    def __init__(self, iHeightScreenV, iWidthScreenV, sPlayerImage, sEnemyImage, sVaccineImage):
+    def __init__(self, iHeightScreenV, iWidthScreenV, sPlayerImage, sEnemyImage, sVaccineImage, sCovidImage):
 
         self.iHeiVal = iHeightScreenV
         self.iWidVal = iWidthScreenV
 
         self.bRunning = True
+
         self.PlayerImage = pygame.image.load(sPlayerImage)
         self.EnemyImage = pygame.image.load(sEnemyImage)
         self.VaccineImage = pygame.image.load(sVaccineImage)
+        self.CovidImage = pygame.image.load(sCovidImage)
+
         self.ScoreFont = pygame.font.SysFont(None, 32)
 
         self.lImage = (self.PlayerImage, self.EnemyImage)
@@ -217,6 +225,11 @@ class cMain(cBMain):
         self.oEntity.PosInit(self.oEntity.lEnemyPos, self.oInitPos.tInitEnemyPos, self.oEntity.EnemyPosDiff)
         self.oEntity.PosInit(self.oEntity.lPlayerPos, self.oInitPos.tInitPlayerPos, self.oEntity.PlayerPosDiff)
         self.oEntity.FlagInit()
+
+    def InitEndEntity(self):
+        self.oEntity.PosInit(self.oEntity.tCovidePos, self.oInitPos.tInitCovidPos, self.oEntity.CoronaPosDiff)
+        lPrintValue = (self.CovidImage, self.oEntity.tCovidePos)
+        return lPrintValue
 
     def Event(self):
         for event in pygame.event.get():
@@ -247,6 +260,8 @@ class cMain(cBMain):
             if _allEvents.key == pygame.K_SPACE:
                 self.oEntity.bFireVaccine.append(True)
                 self.oEntity.tVaccinePos.append([self.oEntity.lPlayerPos[0][0], self.oEntity.lPlayerPos[0][1]])
+            if _allEvents.key == pygame.K_1:
+                self.oEntity.bGetInfection = True
         self.oEntity.PositionChange = 0
 
     def EndKeyboardInput(self, _allEvents):
@@ -259,18 +274,21 @@ class cMain(cBMain):
                 self.oEntity.bGetInfection = False
                 self.bRunning = False
             elif _allEvents.key == pygame.K_RETURN:
+                self.oEntity.ScoreValue = 0
                 self.oEntity.bGetInfection = False
 
     def EndThread(self):
         if self.oEntity.bGetInfection:
+            lPrintValues = self.InitEndEntity()
             while self.oEntity.bGetInfection:
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
+                self.oEntity.PrintEntity(lPrintValues[1], lPrintValues[0])
                 scorePrint = self.ScoreFont.render("Dumb nazi infected you ! Your score is: "
                                                    +
                                                    str(self.oEntity.ScoreValue),
                                                    True, (0, 0, 0))
-                self.pgScreen.blit(scorePrint, ((self.iWidVal / 2) - 10, (self.iHeiVal / 2) - (self.iHeiVal / 4)))
+                self.pgScreen.blit(scorePrint, ((self.iWidVal / 2) - 10, (self.iHeiVal / 2) - 40))
                 self.UpdateScreen()
 
     def SetFlag(self):
@@ -301,8 +319,9 @@ class cMain(cBMain):
             self.UpdateScreen()
             self.oEntity.GetInfected()
             self.EndThread()
+            self.UpdateScreen()
 
 
 if __name__ == "__main__":
-    Main = cMain(1000, 600, 'antifa.png', 'naziscum.png', 'vac.png')
+    Main = cMain(1000, 600, 'antifa.png', 'naziscum.png', 'vac.png', 'covid.png')
     Main.MainFunction()
