@@ -19,13 +19,10 @@ class cBEntity:
     def EnemyPos(self):
         pass
 
-    def EnemyPosInit(self):
+    def PosInit(self, EntityPos, ValuesForInit, PosDiff):
         pass
 
     def newEnemyPosInit(self):
-        pass
-
-    def PlayerPosInit(self):
         pass
 
     def FireVaccine(self, Image):
@@ -80,6 +77,13 @@ class cBMain:
         pass
 
 
+class ValuesForInit:
+    def __init__(self, _tEnemyPos, _tPlayerPos, _tCoronaPos):
+        self.tInitEnemyPos = _tEnemyPos
+        self.tInitPlayerPos = _tPlayerPos
+        self.tInitPlayerPos = _tPlayerPos
+
+
 class cEntity(cBEntity):
     def __init__(self, pyScreen):
         self.Screen = pyScreen
@@ -100,7 +104,6 @@ class cEntity(cBEntity):
         self.Collistion = 27
 
         self.bGetInfection = False
-
 
     def FlagInit(self):
         for it in range(self.EnemyPosDiff):
@@ -166,19 +169,16 @@ class cEntity(cBEntity):
                 if infection < 50:
                     self.bGetInfection = True
 
-    def EnemyPosInit(self):
-        for diffCount in range(self.EnemyPosDiff):
-            self.lEnemyPos.append([random.randint(0, 1000), random.randint(50, 250)])
-
     def newEnemyPosInit(self):
         for it in range(len(self.initNewEnemy)):
             if self.initNewEnemy[it]:
                 self.lEnemyPos[it] = ([random.randint(0, 1000), random.randint(50, 250)])
                 self.initNewEnemy[it] = False
 
-    def PlayerPosInit(self):
-        for diffCount in range(self.PlayerPosDiff):
-            self.lPlayerPos.append([random.randint(430, 460), random.randint(490, 510)])
+    def PosInit(self, EntityPos, ValuesForInit, PosDiff):
+        for it in range(PosDiff):
+            EntityPos.append([random.randint(*ValuesForInit[0]), random.randint(*ValuesForInit[1])])
+        return EntityPos
 
 
 class cMain(cBMain):
@@ -198,6 +198,7 @@ class cMain(cBMain):
         self.pgScreen = pygame.display.set_mode((iHeightScreenV, iWidthScreenV))
 
         self.oEntity = cEntity(self.pgScreen)
+        self.oInitPos = ValuesForInit([(0, 1000), (50, 250)], [(430, 460), (490, 510)], [(0, 1000), (50, 250)])
 
     def ShowScore(self):
         scorePrint = self.ScoreFont.render("You vaccinated : " + str(self.oEntity.ScoreValue) + " Nazis !",
@@ -213,8 +214,8 @@ class cMain(cBMain):
         self.pgScreen.fill((255, 255, 255))
 
     def Init(self):
-        self.oEntity.PlayerPosInit()
-        self.oEntity.EnemyPosInit()
+        self.oEntity.PosInit(self.oEntity.lEnemyPos, self.oInitPos.tInitEnemyPos, self.oEntity.EnemyPosDiff)
+        self.oEntity.PosInit(self.oEntity.lPlayerPos, self.oInitPos.tInitPlayerPos, self.oEntity.PlayerPosDiff)
         self.oEntity.FlagInit()
 
     def Event(self):
