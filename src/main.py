@@ -87,6 +87,11 @@ class ValuesForInit:
         self.tInitCovidPos = _tCoronaPos
 
 
+class TextOutput:
+    def __init__(self, _sGameOver, _sPlayAgain, _sEnd):
+        self.tEndTextOutput = (_sGameOver, _sPlayAgain, _sEnd)
+
+
 class cEntity(cBEntity):
     def __init__(self, pyScreen):
         self.Screen = pyScreen
