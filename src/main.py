@@ -76,6 +76,9 @@ class cBMain:
     def ShowScore(self):
         pass
 
+    def PrintEndInto(self):
+        pass
+
     def EndThread(self):
         pass
 
@@ -210,8 +213,14 @@ class cMain(cBMain):
 
         self.pgScreen = pygame.display.set_mode((iHeightScreenV, iWidthScreenV))
 
+        self.RenderValue = (0, 0, 0)
+
         self.oEntity = cEntity(self.pgScreen)
-        self.oInitPos = ValuesForInit([(0, 1000), (50, 250)], [(430, 460), (490, 510)], [(0, 1000), (50, 250)])
+        self.oInitPos = ValuesForInit([(0, 1000), (50, 250)], [(430, 460), (490, 510)],
+                                      [(0, 1000), (50, 250)])
+        self.oTextOutput = TextOutput("Dumb nazi infected you ! Your score is: ",
+                                      "Press Enter to try again ! ",
+                                      "Press Esc to end game ! ")
 
     def ShowScore(self):
         scorePrint = self.ScoreFont.render("You vaccinated : " + str(self.oEntity.ScoreValue) + " Nazis !",
@@ -284,6 +293,26 @@ class cMain(cBMain):
                 self.oEntity.ScoreValue = 0
                 self.oEntity.bGetInfection = False
 
+    def PrintEndInto(self):
+        lLoopValue = []
+        for textValue, _range in zip(self.oTextOutput.tEndTextOutput, range(len(self.oTextOutput.tEndTextOutput))):
+            if _range == 0:
+                lLoopValue.append(self.ScoreFont.render(textValue
+                                                        +
+                                                        str(self.oEntity.ScoreValue),
+                                                        True, self.RenderValue))
+            else:
+                lLoopValue.append(self.ScoreFont.render(textValue,
+                                                        True, self.RenderValue))
+
+        heightValue = (self.iHeiVal / 2) - 40
+        for _lLoopValue, _range in zip(lLoopValue, range(len(lLoopValue))):
+            widthValue = (self.iWidVal / 2) - 10
+            if _range > 0:
+                widthValue += len(self.oTextOutput.tEndTextOutput[0])
+            self.pgScreen.blit(_lLoopValue, (widthValue, heightValue))
+            heightValue += 50
+
     def EndThread(self):
         if self.oEntity.bGetInfection:
             lPrintValues = self.InitEndEntity()
@@ -291,17 +320,13 @@ class cMain(cBMain):
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
                 self.oEntity.PrintEntity(lPrintValues[1], lPrintValues[0])
-                scorePrint = self.ScoreFont.render("Dumb nazi infected you ! Your score is: "
-                                                   +
-                                                   str(self.oEntity.ScoreValue),
-                                                   True, (0, 0, 0))
-                self.pgScreen.blit(scorePrint, ((self.iWidVal / 2) - 10, (self.iHeiVal / 2) - 40))
+                self.PrintEndInto()
                 self.UpdateScreen()
 
     def SetFlag(self):
-        count = 0
         if not self.oEntity.bFireVaccine:
             return
+        count = 0
         for it in self.oEntity.tVaccinePos:
             count += 1
             if it[1] <= 0:
