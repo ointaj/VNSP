@@ -107,7 +107,7 @@ class cEntity(cBEntity):
         self.tCovidePos = []
 
         self.bFireVaccine = []
-        self.Collision = (27, 50)
+        self.Collision = 50
 
         self.bGetInfection = False
 
@@ -164,7 +164,7 @@ class cEntity(cBEntity):
             count += 1
             for vacPos in self.tVaccinePos:
                 collision = math.sqrt((math.pow(enemyIt[0] - vacPos[0], 2)) + (math.pow(enemyIt[1] - vacPos[1], 2)))
-                if collision < self.Collision[0]:
+                if collision < self.Collision:
                     self.initNewEnemy[count - 1] = True
                     self.ScoreValue += 1
 
@@ -172,7 +172,7 @@ class cEntity(cBEntity):
         for playerIt in self.lPlayerPos:
             for enemyIt in self.lEnemyPos:
                 infection = math.sqrt((math.pow(playerIt[0] - enemyIt[0], 2)) + (math.pow(playerIt[1] - enemyIt[1], 2)))
-                if infection < self.Collision[1]:
+                if infection < self.Collision:
                     self.bGetInfection = True
 
     def newEnemyPosInit(self):
@@ -260,8 +260,10 @@ class cMain(cBMain):
             if _allEvents.key == pygame.K_SPACE:
                 self.oEntity.bFireVaccine.append(True)
                 self.oEntity.tVaccinePos.append([self.oEntity.lPlayerPos[0][0], self.oEntity.lPlayerPos[0][1]])
+            # Test #
             if _allEvents.key == pygame.K_1:
                 self.oEntity.bGetInfection = True
+            # ---- #
         self.oEntity.PositionChange = 0
 
     def EndKeyboardInput(self, _allEvents):
