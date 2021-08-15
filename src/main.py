@@ -76,7 +76,7 @@ class cBMain:
     def ShowScore(self):
         pass
 
-    def PrintEndInto(self):
+    def PrintGameOverInfo(self):
         pass
 
     def EndThread(self):
@@ -293,7 +293,7 @@ class cMain(cBMain):
                 self.oEntity.ScoreValue = 0
                 self.oEntity.bGetInfection = False
 
-    def PrintEndInto(self):
+    def PrintGameOverInfo(self):
         lLoopValue = []
         for textValue, _range in zip(self.oTextOutput.tEndTextOutput, range(len(self.oTextOutput.tEndTextOutput))):
             if _range == 0:
@@ -320,7 +320,7 @@ class cMain(cBMain):
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
                 self.oEntity.PrintEntity(lPrintValues[1], lPrintValues[0])
-                self.PrintEndInto()
+                self.PrintGameOverInfo()
                 self.UpdateScreen()
 
     def SetFlag(self):
