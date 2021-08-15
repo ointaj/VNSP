@@ -19,7 +19,7 @@ class cBEntity:
     def EnemyPos(self):
         pass
 
-    def PosInit(self, EntityPos, ValuesForInit, PosDiff):
+    def PosInit(self, EntityPos, tValuesForInit, PosDiff):
         pass
 
     def newEnemyPosInit(self):
@@ -76,7 +76,13 @@ class cBMain:
     def ShowScore(self):
         pass
 
+    def EndTextPos(self, lLoopValue):
+        pass
+
     def PrintGameOverInfo(self):
+        pass
+
+    def PrintEndGameInfo(self):
         pass
 
     def EndThread(self):
@@ -92,7 +98,9 @@ class ValuesForInit:
 
 class TextOutput:
     def __init__(self, _sGameOver, _sPlayAgain, _sEnd):
-        self.tEndTextOutput = (_sGameOver, _sPlayAgain, _sEnd)
+        self.tGameOverTextOutput = (_sGameOver, _sPlayAgain, _sEnd)
+        self.tEndGameTextOutput = (_sGameOver[_sGameOver.find('!') + 2: len(_sGameOver)],
+                                   _sPlayAgain, _sEnd)
 
 
 class cEntity(cBEntity):
@@ -201,6 +209,7 @@ class cMain(cBMain):
         self.iWidVal = iWidthScreenV
 
         self.bRunning = True
+        self.bEndRunning = False
 
         self.PlayerImage = pygame.image.load(sPlayerImage)
         self.EnemyImage = pygame.image.load(sEnemyImage)
@@ -219,7 +228,7 @@ class cMain(cBMain):
         self.oInitPos = ValuesForInit([(0, 1000), (50, 250)], [(430, 460), (490, 510)],
                                       [(0, 1000), (50, 250)])
         self.oTextOutput = TextOutput("Dumb nazi infected you ! Your score is: ",
-                                      "Press Enter to try again ! ",
+                                      "Press Enter to start again ! ",
                                       "Press Esc to end game ! ")
 
     def ShowScore(self):
@@ -228,7 +237,7 @@ class cMain(cBMain):
         self.pgScreen.blit(scorePrint, ((self.iWidVal / 2) + 40, 10))
 
     def GUI(self):
-        pygame.display.set_caption("Kill nazi")
+        pygame.display.set_caption("VNSP")
         icon = pygame.image.load('antifa.png')
         pygame.display.set_icon(icon)
 
@@ -265,6 +274,8 @@ class cMain(cBMain):
         if _allEvents.type == pygame.KEYDOWN:
             if _allEvents.key == pygame.K_ESCAPE:
                 self.bRunning = False
+                self.bEndRunning = True
+                return
             if _allEvents.key == pygame.K_LEFT:
                 self.oEntity.PositionChange = -1
                 return
@@ -274,9 +285,11 @@ class cMain(cBMain):
             if _allEvents.key == pygame.K_SPACE:
                 self.oEntity.bFireVaccine.append(True)
                 self.oEntity.tVaccinePos.append([self.oEntity.lPlayerPos[0][0], self.oEntity.lPlayerPos[0][1]])
+                return
             # Test #
             if _allEvents.key == pygame.K_1:
                 self.oEntity.bGetInfection = True
+                return
             # ---- #
         self.oEntity.PositionChange = 0
 
@@ -293,9 +306,21 @@ class cMain(cBMain):
                 self.oEntity.ScoreValue = 0
                 self.oEntity.bGetInfection = False
 
+    def EndTextPos(self, lLoopValue):
+        heightValue = (self.iHeiVal / 2) - 40
+        posChange = 0
+        for _lLoopValue, _range in zip(lLoopValue, range(len(lLoopValue))):
+            widthValue = (self.iWidVal / 2) - 10
+            if _range > 0:
+                widthValue += len(self.oTextOutput.tGameOverTextOutput[0]) + posChange
+                posChange += 20
+            self.pgScreen.blit(_lLoopValue, (widthValue, heightValue))
+            heightValue += 40
+
     def PrintGameOverInfo(self):
         lLoopValue = []
-        for textValue, _range in zip(self.oTextOutput.tEndTextOutput, range(len(self.oTextOutput.tEndTextOutput))):
+        for textValue, _range in zip(self.oTextOutput.tGameOverTextOutput,
+                                     range(len(self.oTextOutput.tGameOverTextOutput))):
             if _range == 0:
                 lLoopValue.append(self.ScoreFont.render(textValue
                                                         +
@@ -305,22 +330,18 @@ class cMain(cBMain):
                 lLoopValue.append(self.ScoreFont.render(textValue,
                                                         True, self.RenderValue))
 
-        heightValue = (self.iHeiVal / 2) - 40
-        for _lLoopValue, _range in zip(lLoopValue, range(len(lLoopValue))):
-            widthValue = (self.iWidVal / 2) - 10
-            if _range > 0:
-                widthValue += len(self.oTextOutput.tEndTextOutput[0])
-            self.pgScreen.blit(_lLoopValue, (widthValue, heightValue))
-            heightValue += 50
+        self.EndTextPos(lLoopValue)
 
     def EndThread(self):
-        if self.oEntity.bGetInfection:
-            lPrintValues = self.InitEndEntity()
+        if self.oEntity.bGetInfection or self.bEndRunning:
+            if self.oEntity.bGetInfection:
+                lPrintValues = self.InitEndEntity()
             while self.oEntity.bGetInfection:
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
-                self.oEntity.PrintEntity(lPrintValues[1], lPrintValues[0])
-                self.PrintGameOverInfo()
+                if self.oEntity.bGetInfection:
+                    self.oEntity.PrintEntity(lPrintValues[1], lPrintValues[0])
+                    self.PrintGameOverInfo()
                 self.UpdateScreen()
 
     def SetFlag(self):
