@@ -22,6 +22,9 @@ class cBEntity:
     def PosInit(self, EntityPos, tValuesForInit, PosDiff):
         pass
 
+    def SetNewEnemyInit(self):
+        pass
+
     def newEnemyPosInit(self):
         pass
 
@@ -79,10 +82,7 @@ class cBMain:
     def EndTextPos(self, lLoopValue):
         pass
 
-    def PrintGameOverInfo(self):
-        pass
-
-    def PrintEndGameInfo(self):
+    def PrintEndInfo(self, EndValue):
         pass
 
     def EndThread(self):
@@ -191,6 +191,10 @@ class cEntity(cBEntity):
                 if infection < self.Collision:
                     self.bGetInfection = True
 
+    def SetNewEnemyInit(self):
+        for it in range(len(self.initNewEnemy)):
+            self.initNewEnemy[it] = True
+
     def newEnemyPosInit(self):
         for it in range(len(self.initNewEnemy)):
             if self.initNewEnemy[it]:
@@ -216,13 +220,14 @@ class cMain(cBMain):
         self.VaccineImage = pygame.image.load(sVaccineImage)
         self.CovidImage = pygame.image.load(sCovidImage)
 
-        self.ScoreFont = pygame.font.SysFont(None, 32)
+        self.ScoreFont = pygame.font.SysFont("Arial", 32)
 
         self.lImage = (self.PlayerImage, self.EnemyImage)
 
         self.pgScreen = pygame.display.set_mode((iHeightScreenV, iWidthScreenV))
 
         self.RenderValue = (0, 0, 0)
+        self.lPrintValues = ()
 
         self.oEntity = cEntity(self.pgScreen)
         self.oInitPos = ValuesForInit([(0, 1000), (50, 250)], [(430, 460), (490, 510)],
@@ -251,12 +256,11 @@ class cMain(cBMain):
 
     def InitEndEntity(self):
         self.oEntity.PosInit(self.oEntity.tCovidePos, self.oInitPos.tInitCovidPos, self.oEntity.CoronaPosDiff)
-        lPrintValue = (self.CovidImage, self.oEntity.tCovidePos)
-        return lPrintValue
+        self.lPrintValues = (self.CovidImage, self.oEntity.tCovidePos)
 
     def Event(self):
         for event in pygame.event.get():
-            if not self.oEntity.bGetInfection:
+            if not self.oEntity.bGetInfection and not self.bEndRunning:
                 self.KeyboardInput(event)
             else:
                 self.EndKeyboardInput(event)
@@ -273,7 +277,6 @@ class cMain(cBMain):
             self.bRunning = False
         if _allEvents.type == pygame.KEYDOWN:
             if _allEvents.key == pygame.K_ESCAPE:
-                self.bRunning = False
                 self.bEndRunning = True
                 return
             if _allEvents.key == pygame.K_LEFT:
@@ -295,16 +298,18 @@ class cMain(cBMain):
 
     def EndKeyboardInput(self, _allEvents):
         if _allEvents.type == pygame.QUIT:
-            self.oEntity.bGetInfection = False
             self.bRunning = False
-
+            self.oEntity.bGetInfection = False
+            self.bEndRunning = False
         if _allEvents.type == pygame.KEYDOWN:
             if _allEvents.key == pygame.K_ESCAPE:
                 self.oEntity.bGetInfection = False
+                self.bEndRunning = False
                 self.bRunning = False
             elif _allEvents.key == pygame.K_RETURN:
                 self.oEntity.ScoreValue = 0
                 self.oEntity.bGetInfection = False
+                self.bEndRunning = False
 
     def EndTextPos(self, lLoopValue):
         heightValue = (self.iHeiVal / 2) - 40
@@ -317,10 +322,9 @@ class cMain(cBMain):
             self.pgScreen.blit(_lLoopValue, (widthValue, heightValue))
             heightValue += 40
 
-    def PrintGameOverInfo(self):
+    def PrintEndInfo(self, EndValue):
         lLoopValue = []
-        for textValue, _range in zip(self.oTextOutput.tGameOverTextOutput,
-                                     range(len(self.oTextOutput.tGameOverTextOutput))):
+        for textValue, _range in zip(EndValue, range(len(self.oTextOutput.tGameOverTextOutput))):
             if _range == 0:
                 lLoopValue.append(self.ScoreFont.render(textValue
                                                         +
@@ -334,15 +338,20 @@ class cMain(cBMain):
 
     def EndThread(self):
         if self.oEntity.bGetInfection or self.bEndRunning:
-            if self.oEntity.bGetInfection:
-                lPrintValues = self.InitEndEntity()
-            while self.oEntity.bGetInfection:
+            self.InitEndEntity()
+            while self.oEntity.bGetInfection or self.bEndRunning:
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
                 if self.oEntity.bGetInfection:
-                    self.oEntity.PrintEntity(lPrintValues[1], lPrintValues[0])
-                    self.PrintGameOverInfo()
+                    self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
+                    self.PrintEndInfo(self.oTextOutput.tGameOverTextOutput)
+                elif self.bEndRunning:
+                    self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
+                    self.PrintEndInfo(self.oTextOutput.tEndGameTextOutput)
                 self.UpdateScreen()
+            self.oEntity.SetNewEnemyInit()
+            self.oEntity.newEnemyPosInit()
+            self.lPrintValues = ()
 
     def SetFlag(self):
         if not self.oEntity.bFireVaccine:
@@ -373,7 +382,6 @@ class cMain(cBMain):
             self.oEntity.GetInfected()
             self.EndThread()
             self.UpdateScreen()
-
 
 if __name__ == "__main__":
     Main = cMain(1000, 600, 'antifa.png', 'naziscum.png', 'vac.png', 'covid.png')
