@@ -51,6 +51,9 @@ class cBMain:
     def EndThread(self):
         pass
 
+    def DeallocatedVaccinePos(self):
+        pass
+
 
 class cMain(cBMain):
     def __init__(self, iHeightScreenV, iWidthScreenV, sPlayerImage, sEnemyImage, sVaccineImage, sCovidImage):
@@ -66,7 +69,7 @@ class cMain(cBMain):
         self.VaccineImage = pygame.image.load(sVaccineImage)
         self.CovidImage = pygame.image.load(sCovidImage)
 
-        self.ScoreFont = pygame.font.SysFont("Arial", 32)
+        self.ScoreFont = pygame.font.SysFont(None, 32)
 
         self.lImage = (self.PlayerImage, self.EnemyImage)
 
@@ -132,7 +135,13 @@ class cMain(cBMain):
                 self.oEntity.PositionChange = 1
                 return
             if _allEvents.key == pygame.K_SPACE:
-                self.oEntity.bFireVaccine.append(True)
+                if not self.oEntity.tVaccinePos:
+                    self.oEntity.tVaccinePos.append([self.oEntity.lPlayerPos[0][0], self.oEntity.lPlayerPos[0][1]])
+                    return
+                for it, index in zip(self.oEntity.tVaccinePos, range(len(self.oEntity.tVaccinePos))):
+                    if len(it) == 0:
+                        self.oEntity.tVaccinePos[index] = ([self.oEntity.lPlayerPos[0][0], self.oEntity.lPlayerPos[0][1]])
+                        return
                 self.oEntity.tVaccinePos.append([self.oEntity.lPlayerPos[0][0], self.oEntity.lPlayerPos[0][1]])
                 return
             # Test #
@@ -199,19 +208,22 @@ class cMain(cBMain):
             self.oEntity.newEnemyPosInit()
             self.lPrintValues = ()
 
-    def SetFlag(self):
-        if not self.oEntity.bFireVaccine:
-            return
+    def DeallocatedVaccinePos(self):
         count = 0
-        for it in self.oEntity.tVaccinePos:
-            count += 1
-            if it[1] <= 0:
-                self.oEntity.bFireVaccine[count - 1] = False
+        for VaccinePos in self.oEntity.tVaccinePos:
+            if len(VaccinePos) == 0:
+                count += 1
+        if count == len(self.oEntity.tVaccinePos):
+            self.oEntity.tVaccinePos = []
+        for VaccinePos, index in zip(self.oEntity.tVaccinePos, range(len(self.oEntity.tVaccinePos))):
+            if len(VaccinePos) == 0:
+                continue
+            elif VaccinePos[1] <= 0:
+                self.oEntity.tVaccinePos[index] = []
 
     def MainFunction(self):
         self.Init()
         self.GUI()
-
         while self.bRunning:
             self.Event()
             self.FillScreen()
@@ -220,7 +232,7 @@ class cMain(cBMain):
             self.oEntity.EnemyDestroyed()
             lPrintValues = (self.PlayerImage, self.oEntity.lPlayerPos), (self.EnemyImage, self.oEntity.lEnemyPos)
             self.oEntity.FireVaccine(self.VaccineImage)
-            self.SetFlag()
+            self.DeallocatedVaccinePos()
             self.Entity(lPrintValues)
             self.oEntity.newEnemyPosInit()
             self.ShowScore()

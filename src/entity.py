@@ -57,7 +57,6 @@ class cEntity(cBEntity):
         self.tVaccinePos = []
         self.tCovidePos = []
 
-        self.bFireVaccine = []
         self.Collision = 50
 
         self.bGetInfection = False
@@ -72,14 +71,8 @@ class cEntity(cBEntity):
             self.Screen.blit(entityImage, playPos)
 
     def FireVaccine(self, Image):
-        count = 0
-        if not self.bFireVaccine:
-            return
         for it in self.tVaccinePos:
-            count += 1
-            if not self.bFireVaccine[count - 1]:
-                continue
-            else:
+            if len(it) != 0:
                 it[1] -= 0.5
                 self.Screen.blit(Image, it)
 
@@ -113,11 +106,13 @@ class cEntity(cBEntity):
             return
         for enemyIt in self.lEnemyPos:
             count += 1
-            for vacPos in self.tVaccinePos:
-                collision = math.sqrt((math.pow(enemyIt[0] - vacPos[0], 2)) + (math.pow(enemyIt[1] - vacPos[1], 2)))
-                if collision < self.Collision:
-                    self.initNewEnemy[count - 1] = True
-                    self.ScoreValue += 1
+            for vacPos, itVac in zip(self.tVaccinePos, range(len(self.tVaccinePos))):
+                if len(vacPos) != 0:
+                    collision = math.sqrt((math.pow(enemyIt[0] - vacPos[0], 2)) + (math.pow(enemyIt[1] - vacPos[1], 2)))
+                    if collision < self.Collision:
+                        self.tVaccinePos[itVac] = []
+                        self.initNewEnemy[count - 1] = True
+                        self.ScoreValue += 1
 
     def GetInfected(self):
         for playerIt in self.lPlayerPos:
