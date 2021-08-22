@@ -92,7 +92,7 @@ class cMain(cBMain):
 
     def GUI(self):
         pygame.display.set_caption("VNSP")
-        icon = pygame.image.load('antifa.png')
+        icon = pygame.image.load('Images/antifa.png')
         pygame.display.set_icon(icon)
 
     def FillScreen(self):
@@ -206,6 +206,7 @@ class cMain(cBMain):
                 self.UpdateScreen()
             self.oEntity.SetNewEnemyInit()
             self.oEntity.newEnemyPosInit()
+            self.oEntity.tCovidePos = []
             self.lPrintValues = ()
 
     def DeallocatedVaccinePos(self):
