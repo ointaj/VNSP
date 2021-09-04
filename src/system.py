@@ -20,7 +20,10 @@ class cBMain:
 
     def Event(self):
         pass
-
+    
+    def Break(self):
+        pass
+    
     def MainFunction(self):
         pass
 
@@ -67,7 +70,7 @@ class cMain(cBMain):
         self.iHeiVal = iHeightScreenV
         self.iWidVal = iWidthScreenV
 
-        self.bStartRunning = False # Will be true, now its only because of not using it
+        self.bStartRunning = True # Will be true, now its only because of not using it
         self.bRunning = True
         self.bEndRunning = False
         self.bPause = False  # pause break
@@ -123,7 +126,7 @@ class cMain(cBMain):
                 self.KeyboardInput(event)
             else:
                 self.EndKeyboardInput(event)
-
+                
     def UpdateScreen(self):
         pygame.display.update()
 
@@ -215,7 +218,7 @@ class cMain(cBMain):
             while self.bStartRunning:
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
-            self.bStartRunning = False
+                self.UpdateScreen()
 
     def EndThread(self):
         if self.oEntity.bGetInfection or self.bEndRunning:
@@ -253,6 +256,9 @@ class cMain(cBMain):
         self.Init()
         self.GUI()
         while self.bRunning:
+            self.StartThread()
+            if not self.bRunning:
+                break
             self.Event()
             self.FillScreen()
             self.oEntity.PlayerPos()
