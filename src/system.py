@@ -1,6 +1,8 @@
 from entity import *
 from values import *
-import pygame
+from input import *
+
+
 pygame.init()
 
 
@@ -20,10 +22,7 @@ class cBMain:
 
     def Event(self):
         pass
-    
-    def Break(self):
-        pass
-    
+
     def MainFunction(self):
         pass
 
@@ -90,11 +89,17 @@ class cMain(cBMain):
         self.lPrintValues = ()
 
         self.oEntity = cEntity(self.pgScreen)
-        self.oInitPos = ValuesForInit([(0, 1000), (50, 250)], [(430, 460), (490, 510)],
+        self.oInitPos = ValuesForInit([(0, 1000), (50, 250)],
+                                      [(430, 460), (490, 510)],
                                       [(0, 1000), (50, 250)])
+
         self.oTextOutput = TextOutput("Dumb nazi infected you ! Your score is: ",
                                       "Press Enter to start again ! ",
                                       "Press Esc to end game ! ")
+
+        self.oInputText = cTextInput((((iHeightScreenV / 2) - 100), 200, 140, 42),
+                                     'gray', self.pgScreen,
+                                     self.ScoreFont)
 
     def ShowScore(self):
         scorePrint = self.ScoreFont.render("You vaccinated : " + str(self.oEntity.ScoreValue) + " Nazis !",
@@ -126,7 +131,7 @@ class cMain(cBMain):
                 self.KeyboardInput(event)
             else:
                 self.EndKeyboardInput(event)
-                
+
     def UpdateScreen(self):
         pygame.display.update()
 
@@ -142,6 +147,12 @@ class cMain(cBMain):
             if _allEvents.key == pygame.K_ESCAPE:
                 self.bStartRunning = False
                 self.bRunning = False
+            if _allEvents.key == pygame.K_RETURN:
+                self.bStartRunning = False
+            if _allEvents.key == pygame.K_BACKSPACE:
+                self.oInputText.sUserName = self.oInputText.sUserName[:-1]
+            else:
+                self.oInputText.sUserName += _allEvents.unicode
 
     def KeyboardInput(self, _allEvents):
         if _allEvents.type == pygame.QUIT:
@@ -218,6 +229,7 @@ class cMain(cBMain):
             while self.bStartRunning:
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
+                self.oInputText.InputText()
                 self.UpdateScreen()
 
     def EndThread(self):
@@ -255,10 +267,8 @@ class cMain(cBMain):
     def MainFunction(self):
         self.Init()
         self.GUI()
+        self.StartThread()
         while self.bRunning:
-            self.StartThread()
-            if not self.bRunning:
-                break
             self.Event()
             self.FillScreen()
             self.oEntity.PlayerPos()
