@@ -1,7 +1,7 @@
 from entity import *
 from values import *
 from input import *
-
+from storage import *
 
 pygame.init()
 
@@ -100,6 +100,9 @@ class cMain(cBMain):
         self.oInputText = cTextInput((((iHeightScreenV / 2) - 100), 200, 140, 42),
                                      'gray', self.pgScreen,
                                      self.ScoreFont)
+
+        self.oStorage = cStorage("PlayersData.txt",
+                                 ":")
 
     def ShowScore(self):
         scorePrint = self.ScoreFont.render("You vaccinated : " + str(self.oEntity.ScoreValue) + " Nazis !",
@@ -241,6 +244,8 @@ class cMain(cBMain):
                 if self.oEntity.bGetInfection:
                     self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
                     self.PrintEndInfo(self.oTextOutput.tGameOverTextOutput)
+                    if self.oStorage.bAppendFlag:
+                        self.oStorage.CreateFile(str(self.oEntity.ScoreValue), self.oInputText.sUserName)
                     self.bStartRunning = True
                 elif self.bEndRunning:
                     self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
@@ -250,6 +255,7 @@ class cMain(cBMain):
             self.oEntity.newEnemyPosInit()
             self.oEntity.tCovidePos = []
             self.lPrintValues = ()
+            self.oStorage.bAppendFlag = True
 
     def DeallocatedVaccinePos(self):
         count = 0
@@ -268,6 +274,7 @@ class cMain(cBMain):
         self.Init()
         self.GUI()
         self.StartThread()
+        self.oStorage.CreateFolder()
         while self.bRunning:
             self.Event()
             self.FillScreen()
