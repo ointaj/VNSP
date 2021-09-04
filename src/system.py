@@ -24,6 +24,9 @@ class cBMain:
     def MainFunction(self):
         pass
 
+    def StartKeyboardInput(self, allEvents):
+        pass
+
     def KeyboardInput(self, _allEvents):
         pass
 
@@ -48,6 +51,9 @@ class cBMain:
     def PrintEndInfo(self, EndValue):
         pass
 
+    def StartThread(self):
+        pass
+
     def EndThread(self):
         pass
 
@@ -61,8 +67,10 @@ class cMain(cBMain):
         self.iHeiVal = iHeightScreenV
         self.iWidVal = iWidthScreenV
 
+        self.bStartRunning = False # Will be true, now its only because of not using it
         self.bRunning = True
         self.bEndRunning = False
+        self.bPause = False  # pause break
 
         self.PlayerImage = pygame.image.load(sPlayerImage)
         self.EnemyImage = pygame.image.load(sEnemyImage)
@@ -109,6 +117,8 @@ class cMain(cBMain):
 
     def Event(self):
         for event in pygame.event.get():
+            if self.bStartRunning:
+                self.StartKeyboardInput(event)
             if not self.oEntity.bGetInfection and not self.bEndRunning:
                 self.KeyboardInput(event)
             else:
@@ -120,6 +130,15 @@ class cMain(cBMain):
     def Entity(self, lValues):
         for it in lValues:
             self.oEntity.PrintEntity(it[1], it[0])
+
+    def StartKeyboardInput(self, _allEvents):
+        if _allEvents.type == pygame.QUIT:
+            self.bStartRunning = False
+            self.bRunning = False
+        if _allEvents.type == pygame.KEYDOWN:
+            if _allEvents.key == pygame.K_ESCAPE:
+                self.bStartRunning = False
+                self.bRunning = False
 
     def KeyboardInput(self, _allEvents):
         if _allEvents.type == pygame.QUIT:
@@ -191,6 +210,13 @@ class cMain(cBMain):
 
         self.EndTextPos(lLoopValue)
 
+    def StartThread(self):
+        if self.bStartRunning:
+            while self.bStartRunning:
+                self.Event()
+                self.pgScreen.fill((255, 255, 255))
+            self.bStartRunning = False
+
     def EndThread(self):
         if self.oEntity.bGetInfection or self.bEndRunning:
             self.InitEndEntity()
@@ -200,6 +226,7 @@ class cMain(cBMain):
                 if self.oEntity.bGetInfection:
                     self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
                     self.PrintEndInfo(self.oTextOutput.tGameOverTextOutput)
+                    self.bStartRunning = True
                 elif self.bEndRunning:
                     self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
                     self.PrintEndInfo(self.oTextOutput.tEndGameTextOutput)
