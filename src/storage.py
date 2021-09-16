@@ -1,4 +1,4 @@
-import os.path
+import os
 
 
 class cFileMethods:
@@ -10,13 +10,21 @@ class cFileMethods:
 
 class cFileExtension:
     def __init__(self):
-        self.TxtExt = ".txt"
-        self.CsvExt = ".csv"
+        self.Ext = (".txt", ".csv")
 
 
 class cBStorage:
 
     def FileNameCheck(self):
+        pass
+
+    def FileEmpty(self):
+        pass
+
+    def FileLines(self):
+        pass
+
+    def CheckFileForOverwrite(self, UserName, Score):
         pass
 
     def CreateFolder(self):
@@ -34,8 +42,7 @@ class cStorage(cBStorage):
         self.CurrentDirectory = os.getcwd()
         self.sDirName = 'Storage/'
         self.NewDir = os.path.join(self.CurrentDirectory, r'Storage')
-
-        self.bAppendFlag = True
+        self.LinesOfFileContent = []
 
         self.oFileMethods = cFileMethods()
         self.oFileExtension = cFileExtension()
@@ -43,12 +50,37 @@ class cStorage(cBStorage):
     def FileNameCheck(self):
         PosOfExt = self.sFileName.find(".")
         if PosOfExt != -1:
-            if self.sFileName[PosOfExt:len(self.sFileName)] == self.oFileExtension.TxtExt:
-                return True
-            else:
-                return False
+            for Extension in self.oFileExtension.Ext:
+                if self.sFileName[PosOfExt:len(self.sFileName)] == Extension:
+                    return True
+            return False
         else:
             return False
+
+    def FileEmpty(self):
+        if not os.path.exists(self.sDirName + self.sFileName):
+            return True
+        return os.stat(self.sDirName + self.sFileName).st_size == 0
+
+    def FileLines(self):
+        try:
+            file = open(self.sDirName + self.sFileName, self.oFileMethods.Read)
+            self.LinesOfFileContent = file.readlines()
+            file.close()
+        except:
+            print("Can't open the file")
+
+    def CheckFileForOverwrite(self, UserName, Score):
+        self.FileLines()
+        for FileLine, it in zip(self.LinesOfFileContent, range(len(self.LinesOfFileContent))):
+            DelPos = FileLine.find(self.sDelimeter)
+            if UserName[:-1] == str(FileLine[DelPos + 1:len(FileLine) - 1]):
+                if Score == FileLine[0:DelPos]:
+                    return True, False
+                else:
+                    self.LinesOfFileContent[it] = FileLine.replace(FileLine[0:DelPos], Score)
+                    return True, True
+        return False, False
 
     def CreateFolder(self):
         if not os.path.exists(self.NewDir):
@@ -59,15 +91,31 @@ class cStorage(cBStorage):
                 exit()
 
     def CreateFile(self, _sScore, _sPlayerName):
+        if not self.FileEmpty():
+            Exists, ChangedContent = self.CheckFileForOverwrite(_sPlayerName, _sScore)
+            if Exists and not ChangedContent:
+                return
+            elif ChangedContent:
+                try:
+                    file = open(self.sDirName + self.sFileName, self.oFileMethods.Write)
+                    try:
+                        for fileContent in self.LinesOfFileContent:
+                            file.write(fileContent)
+                    except:
+                        print("Can't write to file")
+                    finally:
+                        file.close()
+                except:
+                    print("File can't be open")
+                return
         if self.FileNameCheck():
             try:
                 file = open(self.sDirName + self.sFileName, self.oFileMethods.Append)
                 try:
-                    file.write(_sScore + self.sDelimeter + _sPlayerName + '\n')
+                    file.write(_sScore + self.sDelimeter + _sPlayerName)
                 except:
                     print("Can't write to file")
                 finally:
                     file.close()
             except:
                 print("File can't be open")
-        self.bAppendFlag = False

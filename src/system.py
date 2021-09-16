@@ -79,6 +79,7 @@ class cMain(cBMain):
         self.VaccineImage = pygame.image.load(sVaccineImage)
         self.CovidImage = pygame.image.load(sCovidImage)
 
+        self.UserName = ""
         self.ScoreFont = pygame.font.SysFont(None, 32)
 
         self.lImage = (self.PlayerImage, self.EnemyImage)
@@ -238,15 +239,13 @@ class cMain(cBMain):
     def EndThread(self):
         if self.oEntity.bGetInfection or self.bEndRunning:
             self.InitEndEntity()
+            self.oStorage.CreateFile(str(self.oEntity.ScoreValue), self.UserName)
             while self.oEntity.bGetInfection or self.bEndRunning:
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
                 if self.oEntity.bGetInfection:
                     self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
                     self.PrintEndInfo(self.oTextOutput.tGameOverTextOutput)
-                    if self.oStorage.bAppendFlag:
-                        self.oStorage.CreateFile(str(self.oEntity.ScoreValue), self.oInputText.sUserName)
-                    self.bStartRunning = True
                 elif self.bEndRunning:
                     self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
                     self.PrintEndInfo(self.oTextOutput.tEndGameTextOutput)
@@ -254,8 +253,8 @@ class cMain(cBMain):
             self.oEntity.SetNewEnemyInit()
             self.oEntity.newEnemyPosInit()
             self.oEntity.tCovidePos = []
+            self.oEntity.tVaccinePos = []
             self.lPrintValues = ()
-            self.oStorage.bAppendFlag = True
 
     def DeallocatedVaccinePos(self):
         count = 0
@@ -274,6 +273,7 @@ class cMain(cBMain):
         self.Init()
         self.GUI()
         self.StartThread()
+        self.UserName = self.oInputText.sUserName
         self.oStorage.CreateFolder()
         while self.bRunning:
             self.Event()
