@@ -1,4 +1,5 @@
 import os
+from messages import *
 
 
 class cFileMethods:
@@ -68,7 +69,7 @@ class cStorage(cBStorage):
             self.LinesOfFileContent = file.readlines()
             file.close()
         except:
-            print("Can't open the file")
+            cErrorMessages.CantOpenFile()
 
     def CheckFileForOverwrite(self, UserName, Score):
         self.FileLines()
@@ -87,7 +88,7 @@ class cStorage(cBStorage):
             try:
                 os.makedirs(self.NewDir)
             except:
-                print("Error of creating storage for game !")
+                cErrorMessages.StorageError()
                 exit()
 
     def CreateFile(self, _sScore, _sPlayerName):
@@ -102,11 +103,11 @@ class cStorage(cBStorage):
                         for fileContent in self.LinesOfFileContent:
                             file.write(fileContent)
                     except:
-                        print("Can't write to file")
+                        cErrorMessages.CantWriteToFile()
                     finally:
                         file.close()
                 except:
-                    print("File can't be open")
+                    cErrorMessages.CantOpenFile()
                 return
         if self.FileNameCheck():
             try:
@@ -114,8 +115,9 @@ class cStorage(cBStorage):
                 try:
                     file.write(_sScore + self.sDelimeter + _sPlayerName)
                 except:
-                    print("Can't write to file")
+                    cErrorMessages.CantWriteToFile()
                 finally:
                     file.close()
             except:
-                print("File can't be open")
+                cErrorMessages.CantOpenFile()
+
