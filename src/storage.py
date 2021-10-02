@@ -1,6 +1,6 @@
 import os
 from messages import *
-
+from stringhelper import *
 
 class cFileMethods:
     def __init__(self):
@@ -47,6 +47,7 @@ class cStorage(cBStorage):
 
         self.oFileMethods = cFileMethods()
         self.oFileExtension = cFileExtension()
+        self.oStringHelper = cStringHelper()
 
     def FileNameCheck(self):
         PosOfExt = self.sFileName.find(".")
@@ -72,10 +73,13 @@ class cStorage(cBStorage):
             cErrorMessages.CantOpenFile()
 
     def CheckFileForOverwrite(self, UserName, Score):
+        charValue = self.oStringHelper.IsRemovelNeeded(UserName)
+        if charValue:
+            UserName = self.oStringHelper.StringFormat(UserName, charValue)
         self.FileLines()
         for FileLine, it in zip(self.LinesOfFileContent, range(len(self.LinesOfFileContent))):
             DelPos = FileLine.find(self.sDelimeter)
-            if UserName[:-1] == str(FileLine[DelPos + 1:len(FileLine) - 1]):
+            if UserName == str(FileLine[DelPos + 1:len(FileLine) - 1]):
                 if Score == FileLine[0:DelPos]:
                     return True, False
                 else:
@@ -120,4 +124,3 @@ class cStorage(cBStorage):
                     file.close()
             except:
                 cErrorMessages.CantOpenFile()
-
