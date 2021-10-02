@@ -2,6 +2,7 @@ import os
 from messages import *
 from stringhelper import *
 
+
 class cFileMethods:
     def __init__(self):
         self.Append = "a"
@@ -34,6 +35,9 @@ class cBStorage:
     def CreateFile(self, _sScore, _sPlayerName):
         pass
 
+    def CreateSortedScore(self):
+        pass
+
 
 class cStorage(cBStorage):
     def __init__(self, _sFileName, _sDelimeter):
@@ -48,6 +52,27 @@ class cStorage(cBStorage):
         self.oFileMethods = cFileMethods()
         self.oFileExtension = cFileExtension()
         self.oStringHelper = cStringHelper()
+
+    def CreateSortedScore(self):
+        ScoreValues = []
+
+        for fileContent in self.LinesOfFileContent:
+            delimeterPos = fileContent.find(self.sDelimeter)
+            Score = fileContent[0:delimeterPos]
+            ScoreValues.append(Score)
+
+        ScoreValues.sort()
+
+        FileContent = []
+
+        for Score in range(len(ScoreValues)):
+            for LineInFile in self.LinesOfFileContent:
+                delimeterPos = LineInFile.find(self.sDelimeter)
+                if Score == LineInFile[0:delimeterPos]:
+                    FileContent.append(LineInFile)
+                    break
+
+        return FileContent
 
     def FileNameCheck(self):
         PosOfExt = self.sFileName.find(".")
