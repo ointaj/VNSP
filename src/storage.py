@@ -61,25 +61,25 @@ class cStorage(cBStorage):
             delimeterPos = fileContent.find(self.sDelimeter)
             Score = fileContent[0:delimeterPos]
             ScoreValues.append(Score)
-        ScoreValues.sort(reverse=True)
+        ScoreValues.sort(reverse = True)
         FileContent = []
         for Score in ScoreValues:
             for LineInFile in self.LinesOfFileContent:
-                bBreakLoop = False
+                bAppendFlag = False
                 delimeterPos = LineInFile.find(self.sDelimeter)
                 if Score == LineInFile[0:delimeterPos]:
                     charValue = self.oStringHelper.IsRemovelNeeded(LineInFile)
                     if charValue:
                         LineInFile = self.oStringHelper.StringFormat(LineInFile, charValue)
                     if FileContent:
-                        for it in FileContent:
-                            char = self.oStringHelper.IsRemovelNeeded(it)
-                            if char:
-                                it = self.oStringHelper.StringFormat(it, char)
-                            if it == LineInFile:
-                                bBreakLoop = True
+                        for FileData in FileContent:
+                            _charValue = self.oStringHelper.IsRemovelNeeded(FileData)
+                            if _charValue:
+                                FileData = self.oStringHelper.StringFormat(FileData, _charValue)
+                            if FileData == LineInFile:
+                                bAppendFlag = True
                                 break
-                    if not bBreakLoop:
+                    if not bAppendFlag:
                         FileContent.append(LineInFile)
         return FileContent
 
