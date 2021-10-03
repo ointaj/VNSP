@@ -55,23 +55,32 @@ class cStorage(cBStorage):
 
     def CreateSortedScore(self):
         ScoreValues = []
-
+        if not self.LinesOfFileContent:
+            self.FileLines()
         for fileContent in self.LinesOfFileContent:
             delimeterPos = fileContent.find(self.sDelimeter)
             Score = fileContent[0:delimeterPos]
             ScoreValues.append(Score)
-
-        ScoreValues.sort()
-
+        ScoreValues.sort(reverse=True)
         FileContent = []
-
-        for Score in range(len(ScoreValues)):
+        for Score in ScoreValues:
             for LineInFile in self.LinesOfFileContent:
+                bBreakLoop = False
                 delimeterPos = LineInFile.find(self.sDelimeter)
                 if Score == LineInFile[0:delimeterPos]:
-                    FileContent.append(LineInFile)
-                    break
-
+                    charValue = self.oStringHelper.IsRemovelNeeded(LineInFile)
+                    if charValue:
+                        LineInFile = self.oStringHelper.StringFormat(LineInFile, charValue)
+                    if FileContent:
+                        for it in FileContent:
+                            char = self.oStringHelper.IsRemovelNeeded(it)
+                            if char:
+                                it = self.oStringHelper.StringFormat(it, char)
+                            if it == LineInFile:
+                                bBreakLoop = True
+                                break
+                    if not bBreakLoop:
+                        FileContent.append(LineInFile)
         return FileContent
 
     def FileNameCheck(self):
@@ -90,6 +99,9 @@ class cStorage(cBStorage):
         return os.stat(self.sDirName + self.sFileName).st_size == 0
 
     def FileLines(self):
+        if self.FileEmpty():
+            print("File is empty !")
+            return
         try:
             file = open(self.sDirName + self.sFileName, self.oFileMethods.Read)
             self.LinesOfFileContent = file.readlines()
@@ -110,6 +122,7 @@ class cStorage(cBStorage):
                 else:
                     self.LinesOfFileContent[it] = FileLine.replace(FileLine[0:DelPos], Score)
                     return True, True
+
         return False, False
 
     def CreateFolder(self):
@@ -137,6 +150,7 @@ class cStorage(cBStorage):
                         file.close()
                 except:
                     cErrorMessages.CantOpenFile()
+                self.LinesOfFileContent = []
                 return
         if self.FileNameCheck():
             try:
@@ -149,3 +163,4 @@ class cStorage(cBStorage):
                     file.close()
             except:
                 cErrorMessages.CantOpenFile()
+        self.LinesOfFileContent = []
