@@ -35,6 +35,9 @@ class cBMain:
     def EndKeyboardInput(self, _allEvents):
         pass
 
+    def ScoreKeyboardInput(self, _allEvents):
+        pass
+
     def UpdateScreen(self):
         pass
 
@@ -62,6 +65,9 @@ class cBMain:
     def DeallocatedVaccinePos(self):
         pass
 
+    def PrintAllScore(self):
+        pass
+
 
 class cMain(cBMain):
     def __init__(self, iHeightScreenV, iWidthScreenV, sPlayerImage, sEnemyImage, sVaccineImage, sCovidImage):
@@ -73,6 +79,7 @@ class cMain(cBMain):
         self.bRunning = True
         self.bEndRunning = False
         self.bPause = False  # pause break
+        self.bAllScore = False
 
         self.PlayerImage = pygame.image.load(sPlayerImage)
         self.EnemyImage = pygame.image.load(sEnemyImage)
@@ -131,10 +138,16 @@ class cMain(cBMain):
         for event in pygame.event.get():
             if self.bStartRunning:
                 self.StartKeyboardInput(event)
+                return
+            if self.bAllScore:
+                self.ScoreKeyboardInput(event)
+                return
             if not self.oEntity.bGetInfection and not self.bEndRunning:
                 self.KeyboardInput(event)
+                return
             else:
                 self.EndKeyboardInput(event)
+                return
 
     def UpdateScreen(self):
         pygame.display.update()
@@ -202,6 +215,25 @@ class cMain(cBMain):
                 self.oEntity.ScoreValue = 0
                 self.oEntity.bGetInfection = False
                 self.bEndRunning = False
+            elif _allEvents.key == pygame.K_BACKSPACE:
+                self.oEntity.bGetInfection = False
+                self.bEndRunning = False
+                self.bAllScore = True
+
+    def ScoreKeyboardInput(self, _allEvents):
+        if _allEvents.type == pygame.QUIT:
+            self.bRunning = False
+            self.oEntity.bGetInfection = False
+            self.bEndRunning = False
+            self.bAllScore = False
+        if _allEvents.type == pygame.KEYDOWN:
+            if _allEvents.key == pygame.K_ESCAPE:
+                self.oEntity.bGetInfection = False
+                self.bEndRunning = False
+                self.bRunning = False
+                self.bAllScore = False
+            elif _allEvents.key == pygame.K_RETURN:
+                self.bEndRunning = False
 
     def EndTextPos(self, lLoopValue):
         heightValue = (self.iHeiVal / 2) - 40
@@ -228,6 +260,18 @@ class cMain(cBMain):
 
         self.EndTextPos(lLoopValue)
 
+    def PrintAllScore(self):
+        self.pgScreen.fill((255, 255, 255))
+        AllScore = self.oStorage.CreateSortedScore()
+        heightValue = (self.iHeiVal / 10)
+        widthValue = (self.iWidVal / 2) - 50
+        for Score in AllScore:
+            self.pgScreen.blit(self.ScoreFont.render(Score, True, self.RenderValue), (widthValue, heightValue))
+            heightValue += 25
+            self.UpdateScreen()
+        while self.bAllScore:
+            self.Event()
+
     def StartThread(self):
         if self.bStartRunning:
             while self.bStartRunning:
@@ -240,7 +284,7 @@ class cMain(cBMain):
         if self.oEntity.bGetInfection or self.bEndRunning:
             self.InitEndEntity()
             self.oStorage.CreateFile(str(self.oEntity.ScoreValue), self.UserName)
-            while self.oEntity.bGetInfection or self.bEndRunning:
+            while self.oEntity.bGetInfection or self.bEndRunning or self.bAllScore:
                 self.Event()
                 self.pgScreen.fill((255, 255, 255))
                 if self.oEntity.bGetInfection:
@@ -249,6 +293,8 @@ class cMain(cBMain):
                 elif self.bEndRunning:
                     self.oEntity.PrintEntity(self.lPrintValues[1], self.lPrintValues[0])
                     self.PrintEndInfo(self.oTextOutput.tEndGameTextOutput)
+                elif self.bAllScore:
+                    self.PrintAllScore()
                 self.UpdateScreen()
             self.oEntity.SetNewEnemyInit()
             self.oEntity.newEnemyPosInit()
