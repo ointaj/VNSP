@@ -264,8 +264,16 @@ class cMain(cBMain):
         self.pgScreen.fill((255, 255, 255))
         AllScore = self.oStorage.CreateSortedScore()
         heightValue = (self.iHeiVal / 10)
-        widthValue = (self.iWidVal / 2) - 50
+        widthValue = (self.iWidVal / 2) + 70
+        newCollumn = 300
+        print(AllScore)
         for Score in AllScore:
+            Score = Score.replace(self.oStorage.sDelimeter, '        ')
+            print(heightValue)
+            if heightValue >= self.iHeiVal - 250:
+                heightValue = self.iHeiVal / 10
+                widthValue = (self.iWidVal / 2) + 70 + newCollumn
+                newCollumn += 300
             self.pgScreen.blit(self.ScoreFont.render(Score, True, self.RenderValue), (widthValue, heightValue))
             heightValue += 25
             self.UpdateScreen()
